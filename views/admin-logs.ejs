@@ -1,7 +1,7 @@
 <%- include('partials/header', { title }) %>
 <form class="filters" method="get">
-  <div class="f f-sm"><label>ตั้งแต่วันที่</label><input type="date" name="from" value="<%= f.from %>"></div>
-  <div class="f f-sm"><label>ถึงวันที่</label><input type="date" name="to" value="<%= f.to %>"></div>
+  <div class="f f-sm"><label>ตั้งแต่วันที่</label><input type="text" name="from" value="<%= f.from %>" placeholder="เช่น 2567-01-01 หรือ 01/01/2567"></div>
+  <div class="f f-sm"><label>ถึงวันที่</label><input type="text" name="to" value="<%= f.to %>" placeholder="เช่น 2567-12-31 หรือ 31/12/2567"></div>
   <div class="f f-sm"><label>ผู้ใช้</label><input name="user" value="<%= f.user %>" placeholder="ชื่อบัญชี"></div>
   <div class="f f-sm"><label>เหตุการณ์</label><select name="event"><option value="">ทั้งหมด</option>
     <% events.forEach(e => { %><option <%= e === f.event ? 'selected' : '' %>><%= e %></option><% }) %></select></div>
