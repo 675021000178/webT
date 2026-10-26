@@ -1,0 +1,13 @@
+<%- include('partials/header', { title }) %>
+<div class="card form-card">
+<form method="post" action="<%= row ? '/admin/permissions/' + row.permission_id + '/update' : '/admin/permissions' %>">
+  <input type="hidden" name="_csrf" value="<%= csrf %>">
+  <div class="field"><label>ชื่อ Permission *</label>
+    <input name="permission_name" maxlength="100" required class="mono" placeholder="เช่น books.export" value="<%= row ? row.permission_name : '' %>">
+    <div class="hint">รูปแบบ resource.action (a-z, 0-9, _ และ .)</div></div>
+  <div class="field"><label>คำอธิบาย</label><input name="description" maxlength="255" value="<%= row ? row.description : '' %>"></div>
+  <div class="alert alert-warn">⚠️ <span>การเพิ่มหรือเปลี่ยนชื่อ Permission ในฐานข้อมูลอย่างเดียว <b>ไม่ได้ป้องกันฟังก์ชันใด</b> — ต้องมีโค้ด <code>requirePerm('ชื่อนี้')</code> ใน Route ที่เกี่ยวข้อง
+    การเปลี่ยนชื่อ Permission ที่โค้ดใช้อยู่ (เช่น books.read) จะทำให้ฟังก์ชันนั้นถูกปิดสำหรับผู้ที่ไม่ใช่ Admin</span></div>
+  <div class="actions"><button class="btn btn-primary">💾 บันทึก</button><a class="btn" href="/admin/permissions">ยกเลิก</a></div>
+</form></div>
+<%- include('partials/footer') %>

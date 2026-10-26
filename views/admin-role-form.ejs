@@ -1,0 +1,12 @@
+<%- include('partials/header', { title }) %>
+<div class="card form-card">
+<form method="post" action="<%= row ? '/admin/roles/' + row.role_id + '/update' : '/admin/roles' %>">
+  <input type="hidden" name="_csrf" value="<%= csrf %>">
+  <div class="field"><label>ชื่อ Role *</label>
+    <input name="role_name" maxlength="50" required pattern="[a-z0-9_]{2,50}" value="<%= row ? row.role_name : '' %>" <%= row && row.is_superuser ? 'readonly' : '' %>>
+    <div class="hint">ตัวพิมพ์เล็ก a-z, 0-9, _ เช่น auditor, member_vip</div></div>
+  <div class="field"><label>คำอธิบาย</label><input name="description" maxlength="255" value="<%= row ? row.description : '' %>"></div>
+  <% if (!row) { %><div class="alert alert-info">ℹ️ <span>Role ใหม่ยังไม่มีสิทธิ์ใดเลย (ปฏิเสธทุกอย่างโดยค่าเริ่มต้น) — กำหนดสิทธิ์ที่หน้า ตารางสิทธิ์ (ACL)</span></div><% } %>
+  <div class="actions"><button class="btn btn-primary">💾 บันทึก</button><a class="btn" href="/admin/roles">ยกเลิก</a></div>
+</form></div>
+<%- include('partials/footer') %>

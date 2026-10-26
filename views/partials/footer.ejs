@@ -1,0 +1,12 @@
+</main></div>
+<script>
+document.addEventListener('submit', function (e) {
+  var m = e.target.getAttribute('data-confirm');
+  if (m && !confirm(m)) e.preventDefault();
+});
+document.addEventListener('click', function (e) {
+  var s = document.getElementById('sidebar');
+  if (s && s.classList.contains('open') && !s.contains(e.target) && !e.target.closest('.menu-btn')) s.classList.remove('open');
+});
+</script>
+</body></html>

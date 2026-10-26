@@ -1,0 +1,34 @@
+<%- include('partials/header', { title }) %>
+<form class="filters" method="get">
+  <div class="f" style="flex:2"><label>ค้นหา</label><input name="q" value="<%= q %>" placeholder="ชื่อหนังสือ ผู้แต่ง หรือ ISBN"></div>
+  <div class="f f-sm"><label>หมวดหมู่</label><select name="category"><option value="">ทั้งหมด</option>
+    <% cats.forEach(c => { %><option <%= c.category === cat ? 'selected' : '' %>><%= c.category %></option><% }) %></select></div>
+  <div class="f f-sm"><label class="check" style="padding:10px 0"><input type="checkbox" name="avail" value="1" <%= onlyAvail ? 'checked' : '' %>> เฉพาะที่ว่าง</label></div>
+  <button class="btn btn-primary">🔍 ค้นหา</button>
+  <% if (q || cat || onlyAvail) { %><a class="btn" href="/app/books">ล้าง</a><% } %>
+  <span style="flex:1"></span>
+  <% if (can('books.export')) { %><a class="btn" href="/app/books/export.csv">⬇️ Export CSV</a><% } %>
+  <% if (can('books.create')) { %><a class="btn btn-primary" href="/app/books/new">＋ เพิ่มหนังสือ</a><% } %>
+</form>
+<% if (!rows.length) { %><div class="card empty">ไม่พบหนังสือที่ค้นหา</div><% } else { %>
+<div class="books">
+<% rows.forEach(b => { %>
+  <div class="book">
+    <a href="/app/books/<%= b.book_id %>" class="cover c<%= b.book_id % 6 %>">
+      <% if (b.cover_id && can('files.read')) { %><img src="/files/<%= b.cover_id %>" alt="" loading="lazy"><% } else { %>📘<% } %>
+    </a>
+    <div class="body">
+      <span class="badge" style="align-self:flex-start"><%= b.category %></span>
+      <h3><a href="/app/books/<%= b.book_id %>" style="color:inherit"><%= b.title %></a></h3>
+      <div class="meta"><%= b.author %></div>
+      <div class="foot">
+        <span class="stock <%= b.available_copies > 0 ? 'ok' : 'low' %>"><%= b.available_copies > 0 ? 'ว่าง ' + b.available_copies + '/' + b.total_copies + ' เล่ม' : 'ถูกยืมหมด' %></span>
+        <a class="btn btn-sm" href="/app/books/<%= b.book_id %>">รายละเอียด</a>
+      </div>
+    </div>
+  </div>
+<% }) %>
+</div>
+<% } %>
+<%- include('partials/pager') %>
+<%- include('partials/footer') %>

@@ -1,0 +1,10 @@
+<% if (pg.pages > 1) { %>
+<div class="pager">
+  <% if (pg.page > 1) { %><a href="<%= pageUrl(pg.page - 1) %>">« ก่อนหน้า</a><% } %>
+  <% for (let i = 1; i <= pg.pages; i++) { if (i === 1 || i === pg.pages || Math.abs(i - pg.page) <= 2) { %>
+    <% if (i === pg.page) { %><span class="cur"><%= i %></span><% } else { %><a href="<%= pageUrl(i) %>"><%= i %></a><% } %>
+  <% } else if (Math.abs(i - pg.page) === 3) { %><span>…</span><% } } %>
+  <% if (pg.page < pg.pages) { %><a href="<%= pageUrl(pg.page + 1) %>">ถัดไป »</a><% } %>
+</div>
+<% } %>
+<p class="muted small" style="text-align:center">ทั้งหมด <%= pg.total %> รายการ</p>

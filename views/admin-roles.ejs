@@ -1,0 +1,16 @@
+<%- include('partials/header', { title }) %>
+<div class="actions" style="margin-bottom:16px;justify-content:space-between">
+  <span class="muted">Role = กลุ่มสิทธิ์ ผู้ใช้ 1 คนมี 1 Role · กำหนด Permission ของแต่ละ Role ที่หน้า <a href="/admin/acl">ตารางสิทธิ์ (ACL)</a></span>
+  <a class="btn btn-primary" href="/admin/roles/new">＋ เพิ่ม Role</a></div>
+<div class="table-wrap"><table>
+  <thead><tr><th>#</th><th>Role</th><th>คำอธิบาย</th><th>ผู้ใช้</th><th>Permission</th><th></th></tr></thead><tbody>
+  <% rows.forEach(r => { %><tr>
+    <td><%= r.role_id %></td>
+    <td><span class="badge <%= r.is_superuser ? 'b-super' : 'b-role' %>"><%= r.role_name %></span></td>
+    <td><%= r.description %></td><td><%= r.users %> คน</td>
+    <td><%= r.is_superuser ? 'ทุกสิทธิ์' : r.perms + ' รายการ' %></td>
+    <td class="right nowrap"><a class="btn btn-sm" href="/admin/roles/<%= r.role_id %>/edit">แก้ไข</a>
+      <% if (!r.is_superuser) { %><form class="inline" method="post" action="/admin/roles/<%= r.role_id %>/delete" data-confirm="ลบ Role <%= r.role_name %>?">
+        <input type="hidden" name="_csrf" value="<%= csrf %>"><button class="btn btn-sm btn-danger">ลบ</button></form><% } %></td>
+  </tr><% }) %></tbody></table></div>
+<%- include('partials/footer') %>

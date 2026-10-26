@@ -1,0 +1,37 @@
+<%- include('head') %>
+<body><div class="app">
+<aside class="sidebar" id="sidebar">
+  <a class="brand" href="/app"><span class="logo">📚</span><span>ห้องสมุดออนไลน์<small>LIBRARY SYSTEM</small></span></a>
+  <nav>
+    <div class="nav-label">เมนูหลัก</div>
+    <a href="/app" class="<%= (path === '/app' || path === '/app/') ? 'active' : '' %>">🏠 แดชบอร์ด</a>
+    <% if (can('books.read')) { %><a href="/app/books" class="<%= active('/app/books') %>">📖 หนังสือ</a><% } %>
+    <% if (can('loans.read.all') || can('loans.read.own')) { %>
+      <a href="/app/loans" class="<%= active('/app/loans') %>">🔖 <%= can('loans.read.all') ? 'คำขอยืมทั้งหมด' : 'รายการยืมของฉัน' %></a>
+    <% } %>
+    <% if (['admin.users','admin.roles','admin.permissions','admin.acl','logs.read'].some(can)) { %>
+      <div class="nav-label">ผู้ดูแลระบบ</div>
+      <a href="/admin" class="<%= path === '/admin' ? 'active' : '' %>">🧭 ภาพรวม</a>
+      <% if (can('admin.users')) { %><a href="/admin/users" class="<%= active('/admin/users') %>">👥 ผู้ใช้</a><% } %>
+      <% if (can('admin.roles')) { %><a href="/admin/roles" class="<%= active('/admin/roles') %>">🎭 Role</a><% } %>
+      <% if (can('admin.permissions')) { %><a href="/admin/permissions" class="<%= active('/admin/permissions') %>">🔑 Permission</a><% } %>
+      <% if (can('admin.acl')) { %><a href="/admin/acl" class="<%= active('/admin/acl') %>">🧩 ตารางสิทธิ์ (ACL)</a><% } %>
+      <% if (can('logs.read')) { %><a href="/admin/logs" class="<%= active('/admin/logs') %>">🧾 Log การใช้งาน</a><% } %>
+    <% } %>
+  </nav>
+  <div class="userbox">
+    <div class="who"><div class="avatar"><%= me.full_name.charAt(0) %></div>
+      <div><b><%= me.full_name %></b><span>@<%= me.username %> · <%= me.role_name %></span></div></div>
+    <form method="post" action="/logout"><input type="hidden" name="_csrf" value="<%= csrf %>">
+      <button class="btn btn-sm" style="width:100%;justify-content:center">ออกจากระบบ</button></form>
+  </div>
+</aside>
+<main class="main">
+  <div class="topbar">
+    <button class="menu-btn" type="button" onclick="document.getElementById('sidebar').classList.toggle('open')">☰</button>
+    <h1><%= title %></h1>
+    <span class="badge <%= me.is_superuser ? 'b-super' : 'b-role' %>"><%= me.role_name %></span>
+  </div>
+  <% flashes.forEach(f => { %>
+    <div class="alert alert-<%= f.type === 'ok' ? 'ok' : (f.type === 'warn' ? 'warn' : 'err') %>"><%= f.type === 'ok' ? '✅' : (f.type === 'warn' ? '⚠️' : '⛔') %> <span><%= f.msg %></span></div>
+  <% }) %>

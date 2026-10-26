@@ -1,0 +1,17 @@
+<%- include('partials/header', { title }) %>
+<div class="card form-card">
+<form method="post" action="<%= row ? '/app/books/' + row.book_id + '/update' : '/app/books' %>">
+  <input type="hidden" name="_csrf" value="<%= csrf %>">
+  <div class="field"><label>ชื่อหนังสือ *</label><input name="title" maxlength="255" required value="<%= row ? row.title : '' %>"></div>
+  <div class="field"><label>ผู้แต่ง *</label><input name="author" maxlength="255" required value="<%= row ? row.author : '' %>"></div>
+  <div class="grid" style="grid-template-columns:1fr 1fr">
+    <div class="field"><label>หมวดหมู่</label><input name="category" maxlength="100" value="<%= row ? row.category : 'ทั่วไป' %>"></div>
+    <div class="field"><label>ISBN</label><input name="isbn" maxlength="20" value="<%= row ? (row.isbn || '') : '' %>"></div>
+  </div>
+  <div class="field"><label>จำนวนเล่มทั้งหมด *</label><input type="number" name="total_copies" min="0" max="9999" required value="<%= row ? row.total_copies : 1 %>">
+    <% if (row) { %><div class="hint">ขณะนี้ว่าง <%= row.available_copies %> เล่ม · ระบบปรับจำนวนเล่มว่างให้อัตโนมัติ</div><% } %></div>
+  <div class="field"><label>คำอธิบาย</label><textarea name="description" rows="4" maxlength="2000"><%= row ? row.description : '' %></textarea></div>
+  <div class="actions"><button class="btn btn-primary">💾 บันทึก</button>
+    <a class="btn" href="<%= row ? '/app/books/' + row.book_id : '/app/books' %>">ยกเลิก</a></div>
+</form></div>
+<%- include('partials/footer') %>

@@ -1,0 +1,13 @@
+<% if (typeof me !== 'undefined' && me) { %><%- include('partials/header', { title }) %>
+<% } else { %><%- include('partials/head', { title }) %><body class="login-page"><div class="login-box card"><% } %>
+<div class="card" style="text-align:center;max-width:560px;margin:30px auto">
+  <div style="font-size:3rem"><%= code === 403 ? '🔒' : (code === 404 ? '🔎' : '⚠️') %></div>
+  <h2 style="margin:6px 0"><%= code %> · <%= title %></h2>
+  <p class="muted"><%= message %></p>
+  <div class="actions" style="justify-content:center;margin-top:14px">
+    <button class="btn" onclick="history.back()">← ย้อนกลับ</button>
+    <% if (typeof me !== 'undefined' && me) { %><a class="btn btn-primary" href="/app">หน้าแรก</a><% } else { %><a class="btn btn-primary" href="/login">เข้าสู่ระบบ</a><% } %>
+  </div>
+</div>
+<% if (typeof me !== 'undefined' && me) { %><%- include('partials/footer') %>
+<% } else { %></div></body></html><% } %>

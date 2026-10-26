@@ -1,0 +1,56 @@
+<%- include('partials/header', { title }) %>
+<div class="grid g2">
+  <div class="card">
+    <h2>📖 <%= loan.title %></h2>
+    <dl class="kv">
+      <dt>ผู้แต่ง</dt><dd><%= loan.author %></dd>
+      <dt>ผู้ยืม</dt><dd><%= loan.full_name %> <span class="muted">(@<%= loan.username %>)</span></dd>
+      <dt>สถานะ</dt><dd><%- include('partials/status', { s: loan.status }) %> <% if (loan.overdue) { %><span class="badge b-failure">เกินกำหนดคืน</span><% } %></dd>
+      <% if (loan.note) { %><dt>หมายเหตุผู้ขอ</dt><dd><%= loan.note %></dd><% } %>
+      <% if (loan.status === 'approved' || loan.status === 'returned') { %><dt>กำหนดคืน</dt><dd><%= fmtDate(loan.due_date) %></dd><% } %>
+      <% if (loan.decision_note) { %><dt>หมายเหตุผู้พิจารณา</dt><dd><%= loan.decision_note %></dd><% } %>
+    </dl>
+    <div class="actions" style="margin-top:16px"><a class="btn" href="/app/loans">← กลับ</a>
+      <% if (can('loans.cancel.own') && loan.status === 'pending' && loan.user_id === me.user_id) { %>
+        <form class="inline" method="post" action="/app/loans/<%= loan.loan_id %>/cancel" data-confirm="ยกเลิกคำขอนี้?">
+          <input type="hidden" name="_csrf" value="<%= csrf %>"><button class="btn btn-danger">ยกเลิกคำขอ</button></form>
+      <% } %>
+    </div>
+  </div>
+
+  <div class="card"><h2>🕒 ความคืบหน้า</h2>
+    <ul class="timeline">
+      <li><b>ส่งคำขอ</b><br><span class="muted small"><%= fmt(loan.requested_at) %></span></li>
+      <% if (loan.decided_at) { %><li><b><%= loan.status === 'rejected' ? 'ปฏิเสธคำขอ' : 'อนุมัติให้ยืม' %></b> โดย <%= loan.decider %><br><span class="muted small"><%= fmt(loan.decided_at) %></span></li><% } %>
+      <% if (loan.returned_at) { %><li><b>คืนหนังสือแล้ว</b> รับโดย <%= loan.receiver %><br><span class="muted small"><%= fmt(loan.returned_at) %></span></li><% } %>
+      <% if (loan.status === 'cancelled') { %><li><b>ผู้ขอยกเลิกคำขอ</b></li><% } %>
+    </ul>
+  </div>
+</div>
+
+<% if (can('loans.approve') && loan.status === 'pending') { %>
+<div class="card"><h2>⚖️ พิจารณาคำขอ</h2>
+  <% if (loan.user_id === me.user_id) { %><div class="alert alert-warn">⚠️ <span>ไม่สามารถอนุมัติหรือปฏิเสธคำขอของตนเองได้</span></div>
+  <% } else { %>
+  <div class="grid g2">
+    <form method="post" action="/app/loans/<%= loan.loan_id %>/approve">
+      <input type="hidden" name="_csrf" value="<%= csrf %>">
+      <div class="field"><label>ระยะเวลายืม (วัน)</label><input type="number" name="days" min="1" max="30" value="7" required></div>
+      <div class="field"><label>หมายเหตุ (ไม่บังคับ)</label><input name="note" maxlength="500"></div>
+      <button class="btn btn-ok">✅ อนุมัติ</button>
+    </form>
+    <form method="post" action="/app/loans/<%= loan.loan_id %>/reject">
+      <input type="hidden" name="_csrf" value="<%= csrf %>">
+      <div class="field"><label>เหตุผลที่ปฏิเสธ</label><input name="note" maxlength="500" placeholder="เช่น หนังสือสำรองไว้สำหรับห้องเรียน"></div>
+      <button class="btn btn-danger">⛔ ปฏิเสธ</button>
+    </form>
+  </div><% } %>
+</div>
+<% } %>
+<% if (can('loans.return') && loan.status === 'approved') { %>
+<div class="card"><h2>📥 รับคืนหนังสือ</h2>
+  <form method="post" action="/app/loans/<%= loan.loan_id %>/return" data-confirm="ยืนยันรับคืนหนังสือเล่มนี้?">
+    <input type="hidden" name="_csrf" value="<%= csrf %>"><button class="btn btn-primary">บันทึกการรับคืน</button></form>
+</div>
+<% } %>
+<%- include('partials/footer') %>

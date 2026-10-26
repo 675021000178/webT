@@ -1,0 +1,18 @@
+<%- include('partials/header', { title }) %>
+<div class="grid g4" style="margin-bottom:18px">
+  <div class="card stat"><div class="ico">👥</div><div><b><%= c.users %></b><span>ผู้ใช้ทั้งหมด</span></div></div>
+  <div class="card stat"><div class="ico">🎭</div><div><b><%= c.roles %></b><span>Role</span></div></div>
+  <div class="card stat"><div class="ico">🔑</div><div><b><%= c.perms %></b><span>Permission</span></div></div>
+  <div class="card stat"><div class="ico" style="background:var(--err-soft)">🚫</div><div><b><%= c.denied %></b><span>ถูกปฏิเสธ (24 ชม.)</span></div></div>
+  <div class="card stat"><div class="ico" style="background:var(--warn-soft)">🔐</div><div><b><%= c.failed_login %></b><span>เข้าสู่ระบบล้มเหลว (24 ชม.)</span></div></div>
+</div>
+<% if (can('logs.read')) { %>
+<div class="card"><h2>🧾 เหตุการณ์ล่าสุด</h2>
+  <div class="table-wrap"><table><thead><tr><th>เวลา</th><th>ผู้ใช้</th><th>เหตุการณ์</th><th>ผล</th><th>รายละเอียด</th></tr></thead><tbody>
+  <% recent.forEach(l => { %><tr><td class="nowrap"><%= fmt(l.created_at) %></td><td><%= l.username || '-' %></td>
+    <td class="mono"><%= l.event %></td><td><span class="badge b-<%= l.result %>"><%= l.result %></span></td><td class="small"><%= l.detail %></td></tr><% }) %>
+  </tbody></table></div>
+  <p style="margin:12px 0 0"><a href="/admin/logs">เปิดหน้า Log เต็ม →</a></p>
+</div>
+<% } %>
+<%- include('partials/footer') %>

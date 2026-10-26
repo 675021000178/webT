@@ -1,0 +1,43 @@
+<%- include('partials/header', { title }) %>
+<p class="muted" style="margin-top:-8px">สวัสดี <b><%= me.full_name %></b> 👋 <%= me.is_superuser ? 'คุณมีสิทธิ์ผู้ดูแลระบบเต็มรูปแบบ' : 'นี่คือภาพรวมตามสิทธิ์ของคุณ' %></p>
+
+<div class="grid g4" style="margin-bottom:18px">
+  <% if (d.books) { %>
+    <div class="card stat"><div class="ico">📖</div><div><b><%= d.books.n %></b><span>ชื่อเรื่องในห้องสมุด</span></div></div>
+    <div class="card stat"><div class="ico" style="background:var(--ok-soft)">✅</div><div><b><%= d.books.av %></b><span>เล่มที่ว่างให้ยืม</span></div></div>
+  <% } %>
+  <% if (d.mine) { %>
+    <div class="card stat"><div class="ico" style="background:var(--info-soft)">🔖</div><div><b><%= d.mine.active %></b><span>คำขอ/รายการยืมของฉัน</span></div></div>
+    <% if (d.mine.overdue) { %><div class="card stat"><div class="ico" style="background:var(--err-soft)">⏰</div><div><b><%= d.mine.overdue %></b><span>เกินกำหนดคืน</span></div></div><% } %>
+  <% } %>
+  <% if (d.all) { %>
+    <div class="card stat"><div class="ico" style="background:var(--warn-soft)">⏳</div><div><b><%= d.all.pending %></b><span>คำขอรออนุมัติ</span></div></div>
+    <div class="card stat"><div class="ico" style="background:var(--info-soft)">📤</div><div><b><%= d.all.borrowed %></b><span>กำลังถูกยืม</span></div></div>
+    <div class="card stat"><div class="ico" style="background:var(--err-soft)">⏰</div><div><b><%= d.all.overdue %></b><span>เกินกำหนดคืน</span></div></div>
+  <% } %>
+</div>
+
+<div class="grid g2">
+  <% if (d.all) { %>
+  <div class="card"><h2>⏳ คำขอที่รอพิจารณา</h2>
+    <% if (!d.queue.length) { %><div class="empty">ไม่มีคำขอค้างอยู่ 🎉</div><% } else { %>
+    <div class="table-wrap"><table><tbody>
+      <% d.queue.forEach(l => { %><tr><td><b><%= l.title %></b><br><span class="muted small">โดย <%= l.full_name %> · <%= fmt(l.requested_at) %></span></td>
+        <td class="right"><a class="btn btn-sm btn-primary" href="/app/loans/<%= l.loan_id %>">พิจารณา</a></td></tr><% }) %>
+    </tbody></table></div><% } %>
+    <p style="margin:12px 0 0"><a href="/app/loans?status=pending">ดูทั้งหมด →</a></p>
+  </div>
+  <% } %>
+  <% if (d.mine) { %>
+  <div class="card"><h2>🔖 รายการยืมล่าสุดของฉัน</h2>
+    <% if (!d.recent.length) { %><div class="empty">ยังไม่มีรายการ <% if (can('books.read')) { %><br><a href="/app/books">ไปเลือกหนังสือ →</a><% } %></div><% } else { %>
+    <div class="table-wrap"><table><tbody>
+      <% d.recent.forEach(l => { %><tr><td><a href="/app/loans/<%= l.loan_id %>"><b><%= l.title %></b></a><br>
+        <span class="muted small"><%= fmt(l.requested_at) %><%= l.due_date && l.status === 'approved' ? ' · กำหนดคืน ' + fmtDate(l.due_date) : '' %></span></td>
+        <td class="right"><%- include('partials/status', { s: l.status }) %></td></tr><% }) %>
+    </tbody></table></div><% } %>
+  </div>
+  <% } %>
+  <% if (!d.all && !d.mine && !d.books) { %><div class="card"><div class="empty">บัญชีนี้ยังไม่ได้รับสิทธิ์ใช้งานฟังก์ชันใด ติดต่อผู้ดูแลระบบ</div></div><% } %>
+</div>
+<%- include('partials/footer') %>

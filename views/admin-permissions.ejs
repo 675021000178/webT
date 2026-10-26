@@ -1,0 +1,27 @@
+<%- include('partials/header', { title }) %>
+<% if (missing.length) { %>
+<div class="card" style="border-color:#c7caff;background:var(--brand-soft)">
+  <h2>🧩 Permission ที่ระบบมีโค้ดรองรับ แต่ยังไม่ได้ลงทะเบียน</h2>
+  <p class="muted" style="margin-top:-6px">กด “ลงทะเบียน” เพื่อเพิ่มเข้าฐานข้อมูล แล้วกำหนดให้ Role ที่ตารางสิทธิ์ (ACL) — ฟังก์ชันเหล่านี้เปิดให้เฉพาะ Admin จนกว่าจะกำหนดสิทธิ์</p>
+  <div class="table-wrap"><table><tbody>
+    <% missing.forEach(m => { %><tr><td class="mono"><b><%= m.name %></b></td><td><%= m.desc %></td><td class="small muted"><%= m.guard %></td>
+      <td class="right"><form class="inline" method="post" action="/admin/permissions/register"><input type="hidden" name="_csrf" value="<%= csrf %>">
+        <input type="hidden" name="permission_name" value="<%= m.name %>"><button class="btn btn-sm btn-primary">＋ ลงทะเบียน</button></form></td></tr><% }) %>
+  </tbody></table></div>
+</div>
+<% } %>
+<div class="actions" style="margin:18px 0 12px;justify-content:space-between">
+  <span class="muted">คอลัมน์ “ป้องกันฟังก์ชัน” แสดง Route ที่มีโค้ดตรวจสิทธิ์ชื่อนั้นจริง</span>
+  <a class="btn btn-primary" href="/admin/permissions/new">＋ เพิ่ม Permission</a></div>
+<div class="table-wrap"><table>
+  <thead><tr><th>Permission</th><th>คำอธิบาย</th><th>ป้องกันฟังก์ชัน</th><th>Role ที่ได้รับ</th><th></th></tr></thead><tbody>
+  <% rows.forEach(p => { %><tr>
+    <td class="mono"><b><%= p.permission_name %></b></td><td><%= p.description %></td>
+    <td class="small"><% if (guardMap[p.permission_name]) { %><span class="muted"><%= guardMap[p.permission_name] %></span>
+      <% } else { %><span class="badge b-pending">ยังไม่มีโค้ดตรวจสิทธิ์</span><% } %></td>
+    <td><%= p.roles %> Role</td>
+    <td class="right nowrap"><a class="btn btn-sm" href="/admin/permissions/<%= p.permission_id %>/edit">แก้ไข</a>
+      <form class="inline" method="post" action="/admin/permissions/<%= p.permission_id %>/delete" data-confirm="ลบ <%= p.permission_name %> ? (จะถูกถอนจาก <%= p.roles %> Role)">
+        <input type="hidden" name="_csrf" value="<%= csrf %>"><button class="btn btn-sm btn-danger">ลบ</button></form></td>
+  </tr><% }) %></tbody></table></div>
+<%- include('partials/footer') %>

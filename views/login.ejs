@@ -1,0 +1,22 @@
+<%- include('partials/head', { title: 'เข้าสู่ระบบ' }) %>
+<body class="login-page">
+<div class="login-box card">
+  <div class="logo">📚</div>
+  <h1>ห้องสมุดออนไลน์</h1>
+  <p class="sub">เข้าสู่ระบบเพื่อใช้งาน</p>
+  <% if (error) { %><div class="alert alert-err">⛔ <span><%= error %></span></div><% } %>
+  <form method="post" action="/login" autocomplete="off">
+    <input type="hidden" name="_csrf" value="<%= csrf %>">
+    <div class="field"><label for="u">ชื่อผู้ใช้</label>
+      <input id="u" name="username" value="<%= username %>" required autofocus maxlength="50"></div>
+    <div class="field"><label for="p">รหัสผ่าน</label>
+      <input id="p" type="password" name="password" required></div>
+    <button class="btn btn-primary" style="width:100%;justify-content:center;padding:11px">เข้าสู่ระบบ</button>
+  </form>
+  <div class="demo">บัญชีทดสอบ (รหัสผ่านเดียวกันทุกบัญชี) — กดเพื่อกรอกอัตโนมัติ<br>
+    <% ['admin','librarian','staff','user'].forEach(n => { %>
+      <button type="button" class="btn btn-sm" onclick="document.getElementById('u').value='<%= n %>';document.getElementById('p').value='1234!';"><%= n %></button>
+    <% }) %>
+  </div>
+</div>
+</body></html>

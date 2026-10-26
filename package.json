@@ -1,0 +1,20 @@
+{
+  "name": "library-system",
+  "version": "1.0.0",
+  "private": true,
+  "description": "ระบบยืมคืนหนังสือห้องสมุด - Node.js, Express 5, PostgreSQL, ACL (Role x Permission), Audit Log",
+  "scripts": {
+    "db:init": "node --env-file=.env init-db.js",
+    "start": "node --env-file=.env app.js",
+    "dev": "node --watch --env-file=.env app.js"
+  },
+  "dependencies": {
+    "bcryptjs": "^3.0.2",
+    "connect-pg-simple": "^10.0.0",
+    "ejs": "^3.1.10",
+    "express": "^5.1.0",
+    "express-session": "^1.18.2",
+    "multer": "^2.0.2",
+    "pg": "^8.16.0"
+  }
+}

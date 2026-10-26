@@ -1,0 +1,19 @@
+<%- include('partials/header', { title }) %>
+<form class="filters" method="get">
+  <div class="f" style="flex:2"><label>ค้นหา</label><input name="q" value="<%= q %>" placeholder="ชื่อผู้ใช้ หรือชื่อ-นามสกุล"></div>
+  <button class="btn btn-primary">🔍 ค้นหา</button><% if (q) { %><a class="btn" href="/admin/users">ล้าง</a><% } %>
+  <span style="flex:1"></span><a class="btn btn-primary" href="/admin/users/new">＋ เพิ่มผู้ใช้</a>
+</form>
+<div class="table-wrap"><table>
+  <thead><tr><th>#</th><th>ชื่อผู้ใช้</th><th>ชื่อ-นามสกุล</th><th>Role</th><th>สถานะ</th><th>สร้างเมื่อ</th><th></th></tr></thead><tbody>
+  <% rows.forEach(u => { %><tr>
+    <td><%= u.user_id %></td><td><b><%= u.username %></b></td><td><%= u.full_name %></td>
+    <td><span class="badge <%= u.is_superuser ? 'b-super' : 'b-role' %>"><%= u.role_name %></span></td>
+    <td><span class="badge <%= u.is_active ? 'b-success' : 'b-cancelled' %>"><%= u.is_active ? 'ใช้งาน' : 'ปิดใช้งาน' %></span></td>
+    <td class="nowrap"><%= fmtDate(u.created_at) %></td>
+    <td class="right nowrap"><a class="btn btn-sm" href="/admin/users/<%= u.user_id %>/edit">แก้ไข</a>
+      <% if (u.user_id !== me.user_id) { %><form class="inline" method="post" action="/admin/users/<%= u.user_id %>/delete" data-confirm="ลบผู้ใช้ <%= u.username %>?">
+        <input type="hidden" name="_csrf" value="<%= csrf %>"><button class="btn btn-sm btn-danger">ลบ</button></form><% } %></td>
+  </tr><% }) %></tbody></table>
+  <% if (!rows.length) { %><div class="empty">ไม่พบผู้ใช้</div><% } %></div>
+<%- include('partials/footer') %>

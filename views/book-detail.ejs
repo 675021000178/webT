@@ -1,0 +1,69 @@
+<%- include('partials/header', { title }) %>
+<% const cover = files.find(f => f.mime_type.startsWith('image/')); %>
+<div class="detail">
+  <div>
+    <div class="cover c<%= book.book_id % 6 %>"><% if (cover) { %><img src="/files/<%= cover.file_id %>" alt="ปกหนังสือ"><% } else { %>📘<% } %></div>
+  </div>
+  <div>
+    <div class="card">
+      <span class="badge"><%= book.category %></span>
+      <h2 style="font-size:1.4rem;margin:8px 0 2px"><%= book.title %></h2>
+      <div class="muted">โดย <%= book.author %></div>
+      <p style="margin:14px 0"><%= book.description || 'ไม่มีคำอธิบาย' %></p>
+      <dl class="kv">
+        <dt>ISBN</dt><dd><%= book.isbn || '-' %></dd>
+        <dt>จำนวนเล่ม</dt><dd><span class="stock <%= book.available_copies > 0 ? 'ok' : 'low' %>">ว่าง <%= book.available_copies %> / <%= book.total_copies %> เล่ม</span></dd>
+      </dl>
+      <div class="actions" style="margin-top:18px">
+        <% if (can('loans.create')) { %>
+          <% if (mine) { %><span class="badge b-<%= mine.status %>">คุณ<%= mine.status === 'pending' ? 'ส่งคำขอไว้แล้ว (รออนุมัติ)' : 'กำลังยืมเล่มนี้อยู่' %></span>
+          <% } else if (book.available_copies < 1) { %><button class="btn" disabled>ไม่มีเล่มว่าง</button>
+          <% } else { %>
+            <form method="post" action="/app/books/<%= book.book_id %>/request" class="actions">
+              <input type="hidden" name="_csrf" value="<%= csrf %>">
+              <input name="note" maxlength="500" placeholder="หมายเหตุถึงเจ้าหน้าที่ (ไม่บังคับ)" style="width:260px">
+              <button class="btn btn-primary">📥 ขอยืมหนังสือ</button>
+            </form>
+          <% } %>
+        <% } %>
+        <% if (can('books.update')) { %><a class="btn" href="/app/books/<%= book.book_id %>/edit">✏️ แก้ไข</a><% } %>
+        <% if (can('books.delete')) { %>
+          <form class="inline" method="post" action="/app/books/<%= book.book_id %>/delete" data-confirm="ลบหนังสือเล่มนี้?">
+            <input type="hidden" name="_csrf" value="<%= csrf %>"><button class="btn btn-danger">🗑️ ลบ</button></form>
+        <% } %>
+        <a class="btn" href="/app/books">← กลับ</a>
+      </div>
+    </div>
+
+    <% if (can('files.read') || can('files.upload')) { %>
+    <div class="card"><h2>🖼️ ภาพและไฟล์แนบ</h2>
+      <% if (can('files.read')) { %>
+        <% if (!files.length) { %><p class="muted">ยังไม่มีไฟล์</p><% } else { %>
+        <ul class="files">
+          <% files.forEach(f => { %>
+          <li>
+            <div class="thumb"><% if (f.mime_type.startsWith('image/')) { %><img src="/files/<%= f.file_id %>" alt=""><% } else { %>📄<% } %></div>
+            <div class="info"><b title="<%= f.original_name %>"><%= f.original_name %></b>
+              <span class="muted small"><%= (f.size_bytes / 1024).toFixed(1) %> KB · <%= f.uploader || 'ไม่ทราบ' %> · <%= fmt(f.uploaded_at) %></span></div>
+            <a class="btn btn-sm" href="/files/<%= f.file_id %>" target="_blank" rel="noopener">เปิดดู</a>
+            <a class="btn btn-sm" href="/files/<%= f.file_id %>?download=1">ดาวน์โหลด</a>
+            <% if (can('files.delete')) { %>
+              <form class="inline" method="post" action="/files/<%= f.file_id %>/delete" data-confirm="ลบไฟล์นี้?">
+                <input type="hidden" name="_csrf" value="<%= csrf %>"><button class="btn btn-sm btn-danger">ลบ</button></form>
+            <% } %>
+          </li>
+          <% }) %>
+        </ul><% } %>
+      <% } %>
+      <% if (can('files.upload')) { %>
+        <form method="post" action="/files/book/<%= book.book_id %>?_csrf=<%= csrf %>" enctype="multipart/form-data" class="actions" style="margin-top:14px">
+          <input type="file" name="file" accept=".jpg,.jpeg,.png,.webp,.pdf,image/jpeg,image/png,image/webp,application/pdf" required style="max-width:340px">
+          <button class="btn btn-primary">⬆️ อัปโหลด</button>
+        </form>
+        <div class="hint">รองรับ JPG, PNG, WEBP, PDF · ไม่เกิน 3 MB (ระบบตรวจชนิดและขนาดที่ฝั่ง Server)</div>
+      <% } %>
+    </div>
+    <% } %>
+  </div>
+</div>
+<%- include('partials/footer') %>

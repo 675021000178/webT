@@ -1,0 +1,28 @@
+<%- include('partials/header', { title }) %>
+<div class="alert alert-info">ℹ️ <span>ติ๊กเพื่อให้ Role มี Permission นั้น แล้วกด “บันทึก” — มีผลทันทีโดยไม่ต้องรีสตาร์ต Server ·
+  Role <b>admin</b> ทำได้ทุกฟังก์ชันอัตโนมัติ (รวมถึง Permission ที่เพิ่มภายหลัง) · ถ้าไม่ติ๊ก = ปฏิเสธ (default deny)</span></div>
+<form method="post" action="/admin/acl">
+  <input type="hidden" name="_csrf" value="<%= csrf %>">
+  <div class="table-wrap"><table class="matrix">
+    <thead><tr><th>Permission</th>
+      <% roles.forEach(r => { %><th><span class="badge <%= r.is_superuser ? 'b-super' : 'b-role' %>"><%= r.role_name %></span></th><% }) %></tr></thead>
+    <tbody>
+    <% let grp = ''; perms.forEach(p => { const g = p.permission_name.split('.')[0];
+       if (g !== grp) { grp = g; %><tr class="grp"><td colspan="<%= roles.length + 1 %>">📁 <%= g %></td></tr><% } %>
+      <tr>
+        <td><span class="mono"><b><%= p.permission_name %></b></span><% if (!bound.has(p.permission_name)) { %> <span class="badge b-pending" title="ยังไม่มีโค้ดตรวจสิทธิ์ชื่อนี้">ไม่มีโค้ดผูก</span><% } %>
+          <br><span class="muted small"><%= p.description %></span></td>
+        <% roles.forEach(r => { const own = r.role_id === me.role_id && !me.is_superuser; %>
+          <td><% if (r.is_superuser) { %><input type="checkbox" checked disabled title="Admin ทำได้ทุกอย่าง">
+            <% } else { %><input type="checkbox" name="grant" value="<%= r.role_id %>:<%= p.permission_id %>"
+              <%= granted.has(r.role_id + ':' + p.permission_id) ? 'checked' : '' %> <%= own ? 'disabled' : '' %>
+              aria-label="<%= r.role_name %> / <%= p.permission_name %>"><% } %></td>
+        <% }) %>
+      </tr>
+    <% }) %>
+    </tbody>
+  </table></div>
+  <% if (me.is_superuser === false) { %><p class="hint">คอลัมน์ Role ของคุณแก้ไขเองไม่ได้</p><% } %>
+  <div class="savebar"><span>แก้ไขตารางแล้วอย่าลืมกดบันทึก</span><button class="btn btn-primary">💾 บันทึกสิทธิ์</button></div>
+</form>
+<%- include('partials/footer') %>

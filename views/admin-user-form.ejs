@@ -1,0 +1,17 @@
+<%- include('partials/header', { title }) %>
+<div class="card form-card">
+<form method="post" action="<%= row ? '/admin/users/' + row.user_id + '/update' : '/admin/users' %>" autocomplete="off">
+  <input type="hidden" name="_csrf" value="<%= csrf %>">
+  <div class="field"><label>ชื่อผู้ใช้ *</label><input name="username" maxlength="50" required pattern="[A-Za-z0-9_.\-]{3,50}" value="<%= row ? row.username : '' %>">
+    <div class="hint">a-z, 0-9, _ . - ยาว 3–50 ตัวอักษร</div></div>
+  <div class="field"><label>ชื่อ-นามสกุล *</label><input name="full_name" maxlength="120" required value="<%= row ? row.full_name : '' %>"></div>
+  <div class="field"><label>Role *</label><select name="role_id" required>
+    <% roles.forEach(r => { %><option value="<%= r.role_id %>" <%= row && row.role_id === r.role_id ? 'selected' : '' %>><%= r.role_name %><%= r.is_superuser ? ' (ผู้ดูแลระบบ)' : '' %></option><% }) %>
+  </select><div class="hint">เปลี่ยน Role แล้วมีผลทันทีกับคำขอถัดไปของผู้ใช้</div></div>
+  <div class="field"><label>รหัสผ่าน <%= row ? '' : '*' %></label>
+    <input type="password" name="password" minlength="6" autocomplete="new-password" <%= row ? '' : 'required' %>>
+    <div class="hint"><%= row ? 'เว้นว่างไว้เพื่อใช้รหัสผ่านเดิม' : 'อย่างน้อย 6 ตัวอักษร (ระบบเก็บเป็น bcrypt hash)' %></div></div>
+  <div class="field"><label class="check"><input type="checkbox" name="is_active" value="1" <%= !row || row.is_active ? 'checked' : '' %>> เปิดใช้งานบัญชี</label></div>
+  <div class="actions"><button class="btn btn-primary">💾 บันทึก</button><a class="btn" href="/admin/users">ยกเลิก</a></div>
+</form></div>
+<%- include('partials/footer') %>

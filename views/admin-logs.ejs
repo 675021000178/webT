@@ -1,0 +1,22 @@
+<%- include('partials/header', { title }) %>
+<form class="filters" method="get">
+  <div class="f f-sm"><label>ตั้งแต่วันที่</label><input type="date" name="from" value="<%= f.from %>"></div>
+  <div class="f f-sm"><label>ถึงวันที่</label><input type="date" name="to" value="<%= f.to %>"></div>
+  <div class="f f-sm"><label>ผู้ใช้</label><input name="user" value="<%= f.user %>" placeholder="ชื่อบัญชี"></div>
+  <div class="f f-sm"><label>เหตุการณ์</label><select name="event"><option value="">ทั้งหมด</option>
+    <% events.forEach(e => { %><option <%= e === f.event ? 'selected' : '' %>><%= e %></option><% }) %></select></div>
+  <div class="f f-sm"><label>ผลลัพธ์</label><select name="result"><option value="">ทั้งหมด</option>
+    <% ['success','failure','denied'].forEach(x => { %><option <%= x === f.result ? 'selected' : '' %>><%= x %></option><% }) %></select></div>
+  <div class="f"><label>ค้นหารายละเอียด</label><input name="q" value="<%= f.q %>"></div>
+  <button class="btn btn-primary">🔍 กรอง</button><a class="btn" href="/admin/logs">ล้าง</a>
+</form>
+<div class="table-wrap"><table>
+  <thead><tr><th>เวลา</th><th>ผู้ใช้</th><th>เหตุการณ์</th><th>ทรัพยากร</th><th>ผล</th><th>รายละเอียด</th><th>IP</th></tr></thead><tbody>
+  <% rows.forEach(l => { %><tr>
+    <td class="nowrap"><%= fmt(l.created_at) %></td><td><%= l.username || '-' %></td><td class="mono"><%= l.event %></td>
+    <td class="small"><%= l.resource || '' %><%= l.resource_id ? ' #' + l.resource_id : '' %></td>
+    <td><span class="badge b-<%= l.result %>"><%= l.result %></span></td><td class="small"><%= l.detail %></td><td class="mono small"><%= l.ip_address %></td>
+  </tr><% }) %></tbody></table>
+  <% if (!rows.length) { %><div class="empty">ไม่พบ Log ตามเงื่อนไข</div><% } %></div>
+<%- include('partials/pager') %>
+<%- include('partials/footer') %>
