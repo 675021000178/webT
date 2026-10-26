@@ -151,7 +151,6 @@ app.use((err, req, res, next) => {
 
 if (require.main === module) {
   const port = Number(process.env.PORT || 3000);
-  const host = process.env.HOST || (PROD ? '[IP_ADDRESS]' : '[IP_ADDRESS]');
-  app.listen(port, host, () => console.log(`เปิด http://localhost:${port}/login`));
+  app.listen(port, () => console.log(`เปิด http://localhost:${port}/login`));
 }
 module.exports = app;
