@@ -1,3 +1,5 @@
+// โหลดค่าจากไฟล์ .env ถ้ามี (รันในเครื่อง) ถ้าไม่มี (เช่นบน Render) ใช้ Environment Variables ของโฮสต์
+try { process.loadEnvFile(); } catch { /* ไม่มี .env */ }
 const path = require('node:path');
 const express = require('express');
 const session = require('express-session');
@@ -11,12 +13,16 @@ if (!process.env.SESSION_SECRET) throw new Error('กรุณาตั้ง SE
 
 const app = express();
 app.disable('x-powered-by');
+const PROD = process.env.NODE_ENV === 'production';
+if (PROD) app.set('trust proxy', 1);   // อยู่หลัง Proxy ของโฮสต์ (HTTPS)
 app.set('view engine', 'ejs');
 app.set('views', path.join(__dirname, 'views'));
 
 app.use((req, res, next) => {            // Security headers พื้นฐาน
-  res.set({ 'X-Content-Type-Options': 'nosniff', 'X-Frame-Options': 'DENY',
-    'Referrer-Policy': 'same-origin' });
+  res.set({
+    'X-Content-Type-Options': 'nosniff', 'X-Frame-Options': 'DENY',
+    'Referrer-Policy': 'same-origin'
+  });
   next();
 });
 app.use(express.static(path.join(__dirname, 'public')));
@@ -25,13 +31,15 @@ app.use(session({
   store: new PgStore({ pool, tableName: 'session' }),   // Session เก็บใน PostgreSQL
   secret: process.env.SESSION_SECRET,
   resave: false, saveUninitialized: false, rolling: true,
-  cookie: { httpOnly: true, sameSite: 'lax', maxAge: 60 * 60 * 1000 }
+  cookie: { httpOnly: true, sameSite: 'lax', secure: PROD, maxAge: 60 * 60 * 1000 }
 }));
 app.use((req, res, next) => { req.body = req.body || {}; next(); });
 app.use(loadUser);
 // ---------- ตัวช่วยแสดงผลใน View ----------
-const dtf = new Intl.DateTimeFormat('th-TH', { timeZone: 'Asia/Bangkok',
-  dateStyle: 'medium', timeStyle: 'short' });
+const dtf = new Intl.DateTimeFormat('th-TH', {
+  timeZone: 'Asia/Bangkok',
+  dateStyle: 'medium', timeStyle: 'short'
+});
 const df = new Intl.DateTimeFormat('th-TH', { timeZone: 'Asia/Bangkok', dateStyle: 'medium' });
 app.use((req, res, next) => {
   res.locals.fmt = d => d ? dtf.format(new Date(d)) : '-';
@@ -39,8 +47,10 @@ app.use((req, res, next) => {
   const here = req.path;
   res.locals.path = here;
   res.locals.active = prefix => (here === prefix || here.startsWith(prefix + '/')) ? 'active' : '';
-  res.locals.statusText = { pending: 'รออนุมัติ', approved: 'กำลังยืม', rejected: 'ปฏิเสธ',
-    returned: 'คืนแล้ว', cancelled: 'ยกเลิก' };
+  res.locals.statusText = {
+    pending: 'รออนุมัติ', approved: 'กำลังยืม', rejected: 'ปฏิเสธ',
+    returned: 'คืนแล้ว', cancelled: 'ยกเลิก'
+  };
   next();
 });
 
@@ -70,8 +80,10 @@ app.post('/login', async (req, res, next) => {
   const f = failState(key);
   if (f && f.count >= MAX_FAILS) {
     await audit(req, { event: 'login', result: 'failure', username, detail: 'ถูกจำกัดชั่วคราว (ลองผิดหลายครั้ง)' });
-    return res.status(429).render('login', { username,
-      error: 'ลองผิดหลายครั้งเกินไป กรุณารอ 10 นาทีแล้วลองใหม่' });
+    return res.status(429).render('login', {
+      username,
+      error: 'ลองผิดหลายครั้งเกินไป กรุณารอ 10 นาทีแล้วลองใหม่'
+    });
   }
   const r = await pool.query('SELECT * FROM users WHERE username=$1', [username]);
   const user = r.rows[0];
@@ -81,10 +93,14 @@ app.post('/login', async (req, res, next) => {
   if (!user || !ok || !user.is_active) {
     const cur = failState(key) || { count: 0, first: Date.now() };
     cur.count++; fails.set(key, cur);
-    await audit(req, { event: 'login', result: 'failure', username,
-      detail: !user ? 'ไม่พบบัญชี' : (!user.is_active ? 'บัญชีถูกปิดใช้งาน' : 'รหัสผ่านไม่ถูกต้อง') });
-    return res.status(401).render('login', { username,
-      error: 'ชื่อผู้ใช้หรือรหัสผ่านไม่ถูกต้อง' });
+    await audit(req, {
+      event: 'login', result: 'failure', username,
+      detail: !user ? 'ไม่พบบัญชี' : (!user.is_active ? 'บัญชีถูกปิดใช้งาน' : 'รหัสผ่านไม่ถูกต้อง')
+    });
+    return res.status(401).render('login', {
+      username,
+      error: 'ชื่อผู้ใช้หรือรหัสผ่านไม่ถูกต้อง'
+    });
   }
   fails.delete(key);
   req.session.regenerate(err => {
@@ -135,6 +151,7 @@ app.use((err, req, res, next) => {
 
 if (require.main === module) {
   const port = Number(process.env.PORT || 3000);
-  app.listen(port, '127.0.0.1', () => console.log('เปิด http://localhost:' + port + '/login'));
+  const host = process.env.HOST || (PROD ? '[IP_ADDRESS]' : '[IP_ADDRESS]');
+  app.listen(port, host, () => console.log(`เปิด http://localhost:${port}/login`));
 }
 module.exports = app;
