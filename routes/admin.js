@@ -300,5 +300,4 @@ router.get('/logs', requirePerm('logs.read'), async (req, res) => {
   };
   res.render('admin-logs', { title: 'Log การใช้งาน', rows, events, f });
 });
-
 module.exports = router;
